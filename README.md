@@ -1,11 +1,11 @@
-# basicnaivebayes
-___________________________________________
+# Very basic sentence sentiment analysis using naive bayes theorem
+______________________________________________________________________________
 
 Basic Naive Bayes classification on text
 
 Let's say you want to classify positive and negative sentences.
 
-```
+```javascript
 var classifier=new NaiveBayes();
 
 
