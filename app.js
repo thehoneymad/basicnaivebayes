@@ -1,79 +1,24 @@
-function NaiveBayes()
-{
-    // Set the tokenizer first, you guys can definitely go for a custom one!
-    this.tokenizer= defaultTokenizer;
-    
-    //This better be a different module
-    this.wordStock={};
-    this.wordStockSize=0;
-    
-    this.totalDocuments=0;
-    
-    this.docCountPerCategory={};
-    this.wordCountPerCategory={};
-    
-    this.wordFrequencyPerCategory={};
-    
-    this.categories={};
-    
-}
+var NaiveBayes = require("./NaiveBayes.js");
 
-NaiveBayes.prototype.initializeCategory = function (categoryName)
-{
-    if(!this.categories[categoryName])
+
+
+
+
+module.exports.group={
+    TestClassifyString1: function(test)
     {
-        this.docCountPerCategory[categoryName]=0;
-        this.wordCountPerCategory[categoryName]=0;
-        this.wordFrequencyPerCategory[categoryName]={};
-        this.categories[categoryName]=true;
+        var classifier=new NaiveBayes();
+        
+        classifier.learn('I love Windows Phone, that thing is amazing', 'positive');
+        classifier.learn('Awesome this is incredibly perfect, great!!', 'positive');
+        
+        classifier.learn('Bad, Laggy thing. Damn. Crap!!', 'negative');
+        var category = classifier.classify('Its a real bad thing to say');
+        
+        console.log(category);
+        
+        test.equal(category, "negative", "Test failed on classification");
+        test.done();
     }
-    
-    return this;
-};
 
-NaiveBayes.prototype.getTokenFrequencyTable = function (tokens) 
-{
-    var frequencyTable = {};
-    
-    tokens.forEach(function (token) 
-    {
-        if (!frequencyTable[token])
-        frequencyTable[token] = 1;
-        else
-        frequencyTable[token]++;
-        
-    });
-    
-    return frequencyTable;
-};
-
-NaiveBayes.prototype.classify=function(text)
-{
-    var self=this;
-    var maxProbability=-Infinity;
-    var chosenCategory=null;
-    
-    var tokens=self.tokenizer(text);
-    var tokenFrequencyTable=self.getTokenFrequencyTable(tokens);
-    
-    Object.keys(self.categories).forEach(function(category){
-        
-        var categoryProbability=self.docCountPerCategory[category]/self.totalDocuments;
-        
-        var logProbability=Math.log(categoryProbability);
-        
-    });
-    
-    
-};
-
-var defaultTokenizer = function (text) 
-{
-    var rgxPunctuation = /[^\w\s]/g;
-    var sanitized = text.replace(rgxPunctuation, ' ');
-    return sanitized.split(/\s+/);
-};
-
-
-
-module.exports.description="A very basic Naive Bayes sentence sentiment classifier";
+}; 
