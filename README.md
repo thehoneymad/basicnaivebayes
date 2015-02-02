@@ -14,7 +14,7 @@ var classifier=new NaiveBayes();
 classifier.learn('I love Windows Phone, that thing is amazing', 'positive');
 classifier.learn('Awesome this is incredibly perfect, great!!', 'positive');
 
-classifier.learn('Bad, Laggy thing. Damn. Crap!!', 'negative');
+classifier.learn('My old Pc is getting Bad, Laggy thing. Damn. Crap!! Need to upgrade!', 'negative');
 
 //Then check yourself!
 
