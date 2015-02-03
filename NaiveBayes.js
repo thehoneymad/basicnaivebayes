@@ -1,141 +1,139 @@
-function NaiveBayes()
-{
+function NaiveBayes() {
     // Set the tokenizer first, you guys can definitely go for a custom one!
-    this.tokenizer= defaultTokenizer;
+    this.tokenizer = defaultTokenizer;
     
     //This better be a different module
-    this.wordStock={};
-    this.wordStockSize=0;
+    this.wordStock = {};
+    this.wordStockSize = 0;
     
-    this.totalDocuments=0;
+    this.totalDocuments = 0;
     
-    this.docCountPerCategory={};
-    this.wordCountPerCategory={};
+    this.docCountPerCategory = {};
+    this.wordCountPerCategory = {};
     
-    this.wordFrequencyPerCategory={};
+    this.wordFrequencyPerCategory = {};
     
-    this.categories={};
-    
+    this.categories = {};
 }
 
-NaiveBayes.prototype.initializeCategory = function (categoryName)
-{
-    if(!this.categories[categoryName])
-    {
-        this.docCountPerCategory[categoryName]=0;
-        this.wordCountPerCategory[categoryName]=0;
-        this.wordFrequencyPerCategory[categoryName]={};
-        this.categories[categoryName]=true;
+NaiveBayes.prototype.initializeCategory = function (categoryName) {
+    if (!this.categories[categoryName]) {
+        this.docCountPerCategory[categoryName] = 0;
+        this.wordCountPerCategory[categoryName] = 0;
+        this.wordFrequencyPerCategory[categoryName] = {};
+        this.categories[categoryName] = true;
     }
     
     return this;
 };
 
-NaiveBayes.prototype.getTokenFrequencyTable = function (tokens) 
-{
+NaiveBayes.prototype.getTokenFrequencyTable = function (tokens) {
     var frequencyTable = {};
     
-    tokens.forEach(function (token) 
-    {
+    tokens.forEach(function (token) {
         if (!frequencyTable[token])
-        frequencyTable[token] = 1;
+            frequencyTable[token] = 1;
         else
-        frequencyTable[token]++;
+            frequencyTable[token]++;
         
     });
     
     return frequencyTable;
 };
 
-NaiveBayes.prototype.learn=function(text, category)
-{
-    var self=this;
+NaiveBayes.prototype.learn = function (text, category) {
+    var self = this;
+    var texts = null;
+    
+    if ('[object Array]' === Object.prototype.toString.call(text)) {
+        texts = text;
+    }
+    else if ('string' === typeof text) {
+        texts = [text];
+    }
+    else {
+        throw 'Invalid type for "text"';
+    }
+    
+    texts.forEach(function (line) {
+        self.learnALine(line, category);
+    });
+}
+
+NaiveBayes.prototype.learnALine = function (text, category) {
+    var self = this;
     
     self.initializeCategory(category);
     
     self.docCountPerCategory[category]++;
     self.totalDocuments++;
     
-    var tokens=self.tokenizer(text);
+    var tokens = self.tokenizer(text);
+    var frequencyTable = self.getTokenFrequencyTable(tokens);
     
-    var frequencyTable=self.getTokenFrequencyTable(tokens);
-    
-    Object.keys(frequencyTable).forEach(function(token){
-        if(!self.wordStock[token])
-        {
-            self.wordStock[token]=true;
+    Object.keys(frequencyTable).forEach(function (token) {
+        if (!self.wordStock[token]) {
+            self.wordStock[token] = true;
             self.wordStockSize++;
         }
         
-        var frequencyInText=frequencyTable[token];
+        var frequencyInText = frequencyTable[token];
         
-        if(!self.wordFrequencyPerCategory[category][token])
-        {
-            self.wordFrequencyPerCategory[category][token]=frequencyInText;
+        if (!self.wordFrequencyPerCategory[category][token]) {
+            self.wordFrequencyPerCategory[category][token] = frequencyInText;
         }
-        else
-        {
-            self.wordFrequencyPerCategory[category][token]+=frequencyInText;
+        else {
+            self.wordFrequencyPerCategory[category][token] += frequencyInText;
         }
         
-        self.wordCountPerCategory[category]+=frequencyInText;
+        self.wordCountPerCategory[category] += frequencyInText;
     });
     
     return self;
 };
 
-NaiveBayes.prototype.classify=function(text)
-{
-    var self=this;
-    var maxProbability=-Infinity;
-    var chosenCategory=null;
+NaiveBayes.prototype.classify = function (text) {
+    var self = this;
+    var maxProbability = -Infinity;
+    var chosenCategory = null;
+    var tokens = self.tokenizer(text);
+    var tokenFrequencyTable = self.getTokenFrequencyTable(tokens);
     
-    var tokens=self.tokenizer(text);
-    var tokenFrequencyTable=self.getTokenFrequencyTable(tokens);
-    
-    Object.keys(self.categories).forEach(function(category){
+    Object.keys(self.categories).forEach(function (category) {
         
-        var categoryProbability=self.docCountPerCategory[category]/self.totalDocuments;
+        var categoryProbability = self.docCountPerCategory[category] / self.totalDocuments;
+        var logProbability = Math.log(categoryProbability);
         
-        var logProbability=Math.log(categoryProbability);
-        
-        
-        Object.keys(tokenFrequencyTable).forEach(function(token){
+        Object.keys(tokenFrequencyTable).forEach(function (token) {
             
-            var tokenFrequencyInText=tokenFrequencyTable[token];
-            var tokenProbability=self.tokenProbability(token, category);
-            
-            logProbability+=tokenFrequencyInText+Math.log(tokenProbability);
-            
+            var tokenFrequencyInText = tokenFrequencyTable[token];
+            var tokenProbability = self.tokenProbability(token, category);    
+            logProbability += tokenFrequencyInText + Math.log(tokenProbability);
         });
         
-        if(logProbability > maxProbability)
-        {
-            maxProbability=logProbability;
-            chosenCategory=category;
+        if (logProbability > maxProbability) {
+            maxProbability = logProbability;
+            chosenCategory = category;
         }
     });
     
     return chosenCategory;
 };
 
-NaiveBayes.prototype.tokenProbability=function(token, category)
-{
+NaiveBayes.prototype.tokenProbability = function (token, category) {
     var wordCount = this.wordCountPerCategory[category];
-    var wordFrequencyCount=this.wordFrequencyPerCategory[category][token]||0;
+    var wordFrequencyCount = this.wordFrequencyPerCategory[category][token] || 0;
     
-    return (wordFrequencyCount+1)/(wordCount+this.wordStockSize);
-    
+    return (wordFrequencyCount + 1) / (wordCount + this.wordStockSize);
 };
 
-var defaultTokenizer = function (text) 
-{
+var defaultTokenizer = function (text) {
     var rgxPunctuation = /[^\w\s]/g;
     var sanitized = text.replace(rgxPunctuation, ' ');
+
     return sanitized.split(/\s+/);
 };
 
-
-NaiveBayes.prototype.description="A very basic Naive Bayes sentence sentiment classifier";
-module.exports=NaiveBayes;
+NaiveBayes.prototype.description = "A very basic Naive Bayes sentence sentiment classifier";
+module.exports = NaiveBayes;
 

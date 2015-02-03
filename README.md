@@ -24,3 +24,7 @@ var category = classifier.classify('Its a real bad thing to say');
 //voila!
 ```
 
+## Opening in Visual Studio 2012/2013
+1. Make sure you have installed Visual Studio (Express and Community edition [full-featured Professional edition for free]) 
+2. Install Node.js Tools for Visual Studio: http://nodejstools.codeplex.com/
+3. Open BasicNaiveBayes.sln
