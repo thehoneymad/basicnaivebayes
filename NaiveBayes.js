@@ -45,7 +45,7 @@ NaiveBayes.prototype.learn = function (text, category) {
     var self = this;
     var texts = null;
     
-    if ('[object Array]' === Object.prototype.toString.call(text)) {
+    if (Array.isArray(text)) {
         texts = text;
     }
     else if ('string' === typeof text) {
