@@ -1,5 +1,7 @@
-var utils = require('./Utils.js');
-var NaiveBayes = require('./NaiveBayes.js');
+var projRequire=require('./projRequire.js');
+
+var utils = projRequire("lib::Utils");
+var NaiveBayes = projRequire("lib::NaiveBayes");
 
 (function (title) {
     var classifier = new NaiveBayes();
